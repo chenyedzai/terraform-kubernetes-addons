@@ -10,7 +10,7 @@ locals {
       namespace                 = "external-secrets"
       service_account_name      = "external-secrets"
       create_ns                 = true
-      enabled                   = true
+      enabled                   = false
       create_iam_resources_irsa = true
       iam_policy_override       = null
       default_network_policy    = true
