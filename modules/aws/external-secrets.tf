@@ -18,15 +18,15 @@ locals {
     }
   ) 
 
-  values_external-secrets = ({}
-  )
+  values_external-secrets = <<-VALUES
+  VALUES
 }
 
 module "iam_assumable_role_external-secrets" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
   version                       = "~> 4.0"
   create_role                   = local.external-secrets["enabled"] && local.external-secrets["create_iam_resources_irsa"]
-  role_name                     = local.external-secrets["name-prefix"]
+  role_name                     = local.external-secrets["name_prefix"]
   provider_url                  = replace(var.eks["cluster_oidc_issuer_url"], "https://", "")
   role_policy_arns              = local.external-secrets["enabled"] && local.external-secrets["create_iam_resources_irsa"] ? [aws_iam_policy.external-secrets[0].arn] : []
   number_of_role_policy_arns    = 1
@@ -36,7 +36,7 @@ module "iam_assumable_role_external-secrets" {
 
 resource "aws_iam_policy" "external-secrets" {
   count = local.external-secrets["enabled"] && local.external-secrets["create_iam_resources_irsa"] ? 1 : 0
-  name     = local.external-secrets["name-prefix"]
+  name     = local.external-secrets["name_prefix"]
   policy   = local.external-secrets["iam_policy_override"] == null ? data.aws_iam_policy_document.external-secrets.json : local.external-secrets["iam_policy_override"]
   tags     = local.tags
 }
@@ -56,7 +56,7 @@ data "aws_iam_policy_document" "external-secrets" {
 }
 
 resource "kubernetes_namespace" "external-secrets" {
-  for_each = local.external-secrets["enabled"] && local.external-secrets["create_ns"] ? 1 : 0
+  count = local.external-secrets["enabled"] && local.external-secrets["create_ns"] ? 1 : 0
 
   metadata {
     labels = {
@@ -94,9 +94,9 @@ resource "helm_release" "external-secrets" {
   reuse_values          = local.external-secrets["reuse_values"]
   skip_crds             = local.external-secrets["skip_crds"]
   verify                = local.external-secrets["verify"]
-  values = compact([
+  values = [
     local.values_external-secrets,
     local.external-secrets["extra_values"]
-  ])
-  namespace = local.external-secrets["create_ns"] ? kubernetes_namespace.vault.*.metadata.0.name[count.index] : local.external-secrets["namespace"]
+  ]
+  namespace = local.external-secrets["namespace"]
 }
