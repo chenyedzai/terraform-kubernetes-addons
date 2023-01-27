@@ -255,3 +255,9 @@ variable "victoria-metrics-k8s-stack" {
   type        = any
   default     = {}
 }
+
+variable "external-secrets" {
+  description = "Map of map for external-secrets configuration: see external-secrets.tf` for supported values"
+  type        = any
+  default     = {}
+}
