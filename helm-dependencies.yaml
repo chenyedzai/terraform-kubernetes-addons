@@ -138,5 +138,5 @@ dependencies:
     version: 0.12.6
     repository: https://victoriametrics.github.io/helm-charts/
   - name: external-secrets
-    version: 0.6.0
+    version: 0.7.1
     repository: https://charts.external-secrets.io
